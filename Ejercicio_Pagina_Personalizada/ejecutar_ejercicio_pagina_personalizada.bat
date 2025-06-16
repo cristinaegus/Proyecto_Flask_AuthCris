@@ -1,5 +1,5 @@
 @echo off
-cd /d %~dp0Ejercicio_Pagina_Personalizada
-call ..\.venv\Scripts\activate.bat
-python app_ejerciciologin.py
+cd /d %~dp0..
+call venv\Scripts\activate.bat
+python -m Ejercicio_Pagina_Personalizada.app_ejerciciologin
 pause

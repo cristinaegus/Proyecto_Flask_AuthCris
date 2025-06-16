@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, make_response
 # Importar CSRFProtect para proteger contra ataques CSRF
 from flask_wtf.csrf import CSRFProtect
-from flask_sqlalchemy import SQLAlchemy
+from Ejercicio_Pagina_Personalizada.extensions import db
 import os
 from flask import send_from_directory
+from Ejercicio_Pagina_Personalizada.blueprints.auth import auth_bp
 
 
 app = Flask(__name__)
@@ -17,7 +18,8 @@ csrf = CSRFProtect(app)
 app.config['WTF_CSRF_ENABLED'] = True
 app.config['WTF_CSRF_SECRET_KEY'] = app.config['CSRF_SECRET_KEY']
 
-db = SQLAlchemy(app)
+db.init_app(app)
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 class LoginUsuario(db.Model):
     __tablename__ = 'login_usuario'
@@ -57,10 +59,9 @@ def favicon():
     )
 @app.route('/')
 def root():
-    # Si ya está registrado, ir directo a mi_web
     if session.get('nombre'):
         return redirect(url_for('bienvenida'))
-    return render_template('home.html')
+    return render_template('inicio.html')
 
 @app.route('/home')
 def home():
