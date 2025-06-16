@@ -1,6 +1,9 @@
 {% extends 'base.html' %} {% block title %}Inicio{% endblock %} {% block content
 %}
 <h2>Bienvenido a la página de inicio</h2>
+{% if mensaje %}
+<div class="mensaje">{{ mensaje }}</div>
+{% endif %}
 <form
   action="{{ url_for('auth.register') }}"
   method="post"

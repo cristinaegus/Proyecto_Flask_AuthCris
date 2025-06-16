@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, redirect, url_for
+from flask import Blueprint, jsonify, request, redirect, url_for, render_template
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity,
     get_jwt
@@ -16,8 +16,8 @@ BLACKLIST = set()
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        # Redirigir a la página de inicio si se accede por GET
-        return redirect(url_for('root'))
+        # Mostrar el formulario de registro
+        return render_template('inicio.html')
 
     # Soportar datos enviados como formulario estándar o JSON
     if request.is_json:
@@ -27,19 +27,19 @@ def register():
 
     # Validaciones
     if not data.get('username') or not data.get('email') or not data.get('password'):
-        return jsonify({'error': 'Username, email y contraseña son requeridos'}), 400
+        return render_template('inicio.html', mensaje='Username, email y contraseña son requeridos')
 
     if not validate_email(data['email']):
-        return jsonify({'error': 'Email inválido'}), 400
+        return render_template('inicio.html', mensaje='Email inválido')
 
     if not validate_password(data['password']):
-        return jsonify({'error': 'Contraseña debe tener al menos 6 caracteres'}), 400
+        return render_template('inicio.html', mensaje='Contraseña debe tener al menos 6 caracteres')
 
     if Usuario.query.filter_by(username=data['username']).first():
-        return jsonify({'error': 'Username ya existe'}), 400
+        return render_template('inicio.html', mensaje='Username ya existe')
 
     if Usuario.query.filter_by(email=data['email']).first():
-        return jsonify({'error': 'Email ya registrado'}), 400
+        return render_template('inicio.html', mensaje='Email ya registrado')
 
     # Crear nuevo usuario
     usuario = Usuario.from_dict(data)
@@ -48,10 +48,7 @@ def register():
     db.session.add(usuario)
     db.session.commit()
 
-    return jsonify({
-        'mensaje': 'Usuario creado exitosamente',
-        'usuario': usuario.to_dict()
-    }), 201
+    return render_template('inicio.html', mensaje='Usuario creado exitosamente')
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

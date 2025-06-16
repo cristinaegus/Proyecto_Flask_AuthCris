@@ -61,3 +61,4 @@ class Usuario(db.Model):
     # Agregar método para verificar si el usuario está activo
     def is_active(self):
         return self.activo
+    

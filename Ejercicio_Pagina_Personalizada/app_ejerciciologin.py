@@ -5,6 +5,7 @@ from Ejercicio_Pagina_Personalizada.extensions import db
 import os
 from flask import send_from_directory
 from Ejercicio_Pagina_Personalizada.blueprints.auth import auth_bp
+from Ejercicio_Pagina_Personalizada.models.usuario import Usuario
 
 
 app = Flask(__name__)
@@ -59,14 +60,11 @@ def favicon():
     )
 @app.route('/')
 def root():
-    if session.get('nombre'):
-        return redirect(url_for('bienvenida'))
-    return render_template('inicio.html')
+    return redirect(url_for('home'))
 
 @app.route('/home')
 def home():
-    # Redirigir a la raíz para mantener un solo punto de entrada
-    return redirect(url_for('root'))
+    return render_template('home.html')
 
 @app.route('/configurar', methods=['GET', 'POST'])
 def configurar():
@@ -156,6 +154,36 @@ def salir():
     resp = make_response(redirect(url_for('root')))
     resp.set_cookie('color', '', expires=0)
     return resp
+
+@app.route('/verificar_usuario', methods=['GET'])
+def verificar_usuario():
+    username = request.args.get('username')
+    if not username:
+        return {'error': 'Falta el parámetro username'}, 400
+    usuario = db.session.query(Usuario).filter_by(username=username).first()
+    if usuario:
+        return {'acceso': True, 'usuario': usuario.to_dict()}
+    else:
+        return {'acceso': False, 'error': 'Usuario no encontrado'}, 404
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    from flask import render_template, request, session
+    mensaje = None
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if not email or not password:
+            mensaje = 'Email y contraseña requeridos.'
+        else:
+            usuario = Usuario.query.filter_by(email=email).first()
+            if usuario and usuario.check_password(password):
+                session['nombre'] = usuario.nombre or usuario.username
+                session['email'] = usuario.email
+                return redirect(url_for('bienvenida'))
+            else:
+                mensaje = 'Email o contraseña incorrectos.'
+    return render_template('login.html', mensaje=mensaje)
 
 if __name__ == '__main__':
     with app.app_context():

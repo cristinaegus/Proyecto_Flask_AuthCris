@@ -1,0 +1,19 @@
+{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block content
+%}
+<h2>Iniciar sesión</h2>
+<form action="{{ url_for('login') }}" method="post" class="form-registro">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required />
+  </div>
+  <div>
+    <label for="password">Contraseña:</label>
+    <input type="password" id="password" name="password" required />
+  </div>
+  <button type="submit">Iniciar sesión</button>
+  {% if mensaje %}
+  <div class="mensaje-error">{{ mensaje }}</div>
+  {% endif %}
+</form>
+{% endblock %}
