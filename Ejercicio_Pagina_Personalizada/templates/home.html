@@ -1,0 +1,8 @@
+{% extends "base.html" %} {% block title %}Inicio{% endblock %} {% block content
+%}
+<h2>Bienvenido a la aplicación de tareas personalizadas</h2>
+<p>Por favor, regístrate y configura tus preferencias para comenzar.</p>
+<a href="{{ url_for('configurar') }}" class="btn-inicio"
+  >Ir al registro y configuración</a
+>
+{% endblock %}

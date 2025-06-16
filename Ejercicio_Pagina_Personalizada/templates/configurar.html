@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block title %}Configurar preferencias{% endblock %}
+{% block extra_head %}
+<script>
+  function cambiarFondo(input) {
+    document.body.style.background = input.value;
+  }
+</script>
+{% endblock %} {% block content %}
+<h2>Registrate y personaliza tu experiencia</h2>
+{% if mensaje %}
+<div class="mensaje">{{ mensaje }}</div>
+{% endif %}
+<form method="post">
+  <label for="nombre">Nombre:</label>
+  <input
+    type="text"
+    id="nombre"
+    name="nombre"
+    value="{{ nombre or '' }}"
+    required
+  /><br /><br />
+  <label for="apellido">Apellido:</label>
+  <input
+    type="text"
+    id="apellido"
+    name="apellido"
+    value="{{ apellido or '' }}"
+    required
+  /><br /><br />
+  <label for="email">Email:</label>
+  <input
+    type="email"
+    id="email"
+    name="email"
+    value="{{ email or '' }}"
+    required
+  /><br /><br />
+  <label for="color">Color de fondo preferido:</label>
+  <input
+    type="color"
+    id="color"
+    name="color"
+    value="{{ color|default('#ffffff') }}"
+    required
+    onchange="cambiarFondo(this)"
+  /><br /><br />
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <button type="submit">Guardar</button>
+</form>
+<p>Tu color de fondo preferido ha sido aplicado.</p>
+<a href="{{ url_for('olvidar') }}">Olvidar preferencias</a>
+{% endblock %}

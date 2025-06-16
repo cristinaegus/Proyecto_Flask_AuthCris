@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block title %}Bienvenida{% endblock %} {% block
+content %}
+<h2>Bienvenido a mi página web</h2>
+<div class="salir-derecha">
+  <a href="{{ url_for('salir') }}" class="btn-salir">Salir</a>
+</div>
+
+<h3>Agregar nueva tarea</h3>
+{% if mensaje_tarea %}
+<div class="mensaje">{{ mensaje_tarea }}</div>
+{% endif %}
+<form method="post" action="{{ url_for('bienvenida') }}" class="form-tarea">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <label for="descripcion">Descripción:</label>
+  <input type="text" id="descripcion" name="descripcion" required />
+  <label for="estado">Estado:</label>
+  <select id="estado" name="estado" required>
+    <option value="Pendiente">Pendiente</option>
+    <option value="En progreso">En progreso</option>
+    <option value="Hecho">Hecho</option>
+  </select>
+
+  <button type="submit">Agregar tarea</button>
+</form>
+{% if tareas and tareas|length > 0 %}
+<h3>Tus tareas</h3>
+<table class="tabla-tareas">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Tarea</th>
+      <th>Estado</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tarea in tareas %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ tarea.descripcion }}</td>
+      <td>{{ tarea.estado }}</td>
+      <td>
+        <form
+          method="post"
+          action="{{ url_for('borrar_tarea', idx=loop.index0) }}"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn-borrar-tarea">Borrar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No tienes tareas registradas.</p>
+{% endif %} {% endblock %}
