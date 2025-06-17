@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, make_response, flash
 # Importar CSRFProtect para proteger contra ataques CSRF
 from flask_wtf.csrf import CSRFProtect
 from Ejercicio_Pagina_Personalizada.extensions import db
 import os
 from flask import send_from_directory
 from Ejercicio_Pagina_Personalizada.blueprints.auth import auth_bp
+from Ejercicio_Pagina_Personalizada.blueprints.admin import admin_bp
 from Ejercicio_Pagina_Personalizada.models.usuario import Usuario
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token
@@ -27,6 +28,7 @@ app.config['WTF_CSRF_SECRET_KEY'] = app.config['CSRF_SECRET_KEY']
 db.init_app(app)
 migrate = Migrate(app, db)
 app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(admin_bp)
 
 # Inicializar JWTManager
 jwt = JWTManager(app)
@@ -201,6 +203,23 @@ def login():
             else:
                 mensaje = 'Email o contraseña incorrectos.'
     return render_template('login.html', mensaje=mensaje)
+
+@app.route('/admin/promote', methods=['GET', 'POST'])
+@roles_required('admin')
+def promote_admin_web():
+    from Ejercicio_Pagina_Personalizada.models.usuario import Usuario
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        usuario = Usuario.query.get(user_id)
+        if usuario:
+            usuario.rol = 'admin'
+            db.session.commit()
+            flash(f"Usuario {usuario.email} ahora es administrador.", "success")
+        else:
+            flash("Usuario no encontrado.", "danger")
+        return redirect(url_for('promote_admin_web'))
+    usuarios = Usuario.query.all()
+    return render_template('promote_admin.html', usuarios=usuarios)
 
 # El decorador roles_required ahora está en decorators.py
 

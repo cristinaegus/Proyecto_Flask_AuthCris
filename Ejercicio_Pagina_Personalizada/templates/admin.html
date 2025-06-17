@@ -4,4 +4,27 @@
 <p>
   Bienvenido, administrador. Aquí puedes gestionar la aplicación y los usuarios.
 </p>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Password Hash</th>
+      <th>Token</th>
+      <th>Rol</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for usuario in usuarios %}
+    <tr>
+      <td>{{ usuario.nombre or usuario.username }}</td>
+      <td>{{ usuario.email }}</td>
+      <td>{{ usuario.password_hash }}</td>
+      <td>{{ usuario.token if usuario.token else '-' }}</td>
+      <td>{{ usuario.rol }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

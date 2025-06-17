@@ -1,7 +1,6 @@
-{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block content
-%}
+{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block content %}
 <h2>Iniciar sesión</h2>
-<form action="{{ url_for('login') }}" method="post" class="form-registro">
+<form id="loginForm" class="form-registro">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
   <div>
     <label for="email">Email:</label>
@@ -12,8 +11,29 @@
     <input type="password" id="password" name="password" required />
   </div>
   <button type="submit">Iniciar sesión</button>
-  {% if mensaje %}
-  <div class="mensaje-error">{{ mensaje }}</div>
-  {% endif %}
+  <div id="mensaje-error" class="mensaje-error"></div>
 </form>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const csrf_token = document.querySelector('input[name="csrf_token"]').value;
+
+  const res = await fetch('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf_token },
+    body: JSON.stringify({ email, password }),
+    credentials: 'include'
+  });
+  const data = await res.json();
+  if (data.usuario && data.usuario.rol === 'admin') {
+    window.location.href = '/admin';
+  } else if (data.access_token) {
+    window.location.href = '/home';
+  } else if (data.error) {
+    document.getElementById('mensaje-error').innerText = data.error;
+  }
+});
+</script>
 {% endblock %}

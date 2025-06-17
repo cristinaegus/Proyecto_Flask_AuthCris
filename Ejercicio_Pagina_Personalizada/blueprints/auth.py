@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, redirect, url_for, render_template, session
+from flask import Blueprint, jsonify, request, redirect, url_for, render_template, session, make_response
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity,
     get_jwt
@@ -79,7 +79,8 @@ def login():
 
     response = jsonify({
         'access_token': access_token,
-        'usuario': usuario.to_dict()
+        'usuario': usuario.to_dict(),
+        'rol': usuario.rol
     })
     response.set_cookie(
         'access_token_cookie',
@@ -124,11 +125,14 @@ def get_current_user():
 @auth_bp.route('/admin')
 @roles_required('admin')
 def admin_panel():
-    current_user_id = get_jwt_identity()
-    usuario = Usuario.query.get(current_user_id)
-    if not usuario:
-        return jsonify({'error': 'Acceso denegado'}), 403
-    return render_template('admin.html', usuario=usuario)
+    usuarios = Usuario.query.all()
+    # Si tienes tokens asociados a usuarios, añade la lógica aquí para incluirlos en el diccionario
+    usuarios_dict = []
+    for usuario in usuarios:
+        user_dict = usuario.to_dict()
+        user_dict['token'] = getattr(usuario, 'token', None)  # Si tienes un campo token
+        usuarios_dict.append(user_dict)
+    return render_template('admin.html', usuarios=usuarios_dict)
 
 @auth_bp.route('/admin_dashboard')
 @roles_required('admin')
@@ -138,6 +142,8 @@ def admin_dashboard():
     if not usuario:
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', username=usuario.username)
+
+# El panel de administración ahora está en admin.py
 
 
 

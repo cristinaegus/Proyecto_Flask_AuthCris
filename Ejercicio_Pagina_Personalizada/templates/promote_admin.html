@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Promover a Administrador{% endblock %}
+{% block content %}
+<h2>Promover usuario a administrador</h2>
+<form method="post">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol actual</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usuario in usuarios %}
+      <tr>
+        <td>{{ usuario.nombre or usuario.username }}</td>
+        <td>{{ usuario.email }}</td>
+        <td>{{ usuario.rol }}</td>
+        <td>
+          {% if usuario.rol != 'admin' %}
+          <button type="submit" name="user_id" value="{{ usuario.id }}" class="btn btn-primary">Promover a admin</button>
+          {% else %}
+          <span class="badge bg-success">Administrador</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</form>
+{% endblock %}
