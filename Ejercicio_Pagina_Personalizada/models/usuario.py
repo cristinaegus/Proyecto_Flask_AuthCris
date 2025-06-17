@@ -8,12 +8,13 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     nombre = db.Column(db.String(100), nullable=True)
     apellido = db.Column(db.String(100), nullable=True)
     activo = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
     ultimo_acceso = db.Column(db.DateTime, nullable=True)
+    rol = db.Column(db.String(20), default='usuario')
     
     def __repr__(self):
         return f'<Usuario {self.username}>'
@@ -36,7 +37,8 @@ class Usuario(db.Model):
             'apellido': self.apellido,
             'activo': self.activo,
             'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
-            'ultimo_acceso': self.ultimo_acceso.isoformat() if self.ultimo_acceso else None
+            'ultimo_acceso': self.ultimo_acceso.isoformat() if self.ultimo_acceso else None,
+            'rol': self.rol
         }
         
         if include_sensitive:
@@ -52,7 +54,8 @@ class Usuario(db.Model):
             email=data.get('email'),
             nombre=data.get('nombre'),
             apellido=data.get('apellido'),
-            activo=data.get('activo', True)
+            activo=data.get('activo', True),
+            rol=data.get('rol', 'usuario')
         )
         if 'password' in data:
             usuario.set_password(data['password'])
@@ -61,4 +64,3 @@ class Usuario(db.Model):
     # Agregar método para verificar si el usuario está activo
     def is_active(self):
         return self.activo
-    

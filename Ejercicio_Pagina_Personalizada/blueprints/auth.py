@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, redirect, url_for, render_template
+from flask import Blueprint, jsonify, request, redirect, url_for, render_template, session
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity,
     get_jwt
@@ -7,6 +7,7 @@ from Ejercicio_Pagina_Personalizada.extensions import jwt, db
 from ..models.usuario import Usuario
 from datetime import datetime, timezone
 from Ejercicio_Pagina_Personalizada.utils.validators import validate_email, validate_password
+from Ejercicio_Pagina_Personalizada.decorators import roles_required
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -72,13 +73,22 @@ def login():
     usuario.ultimo_acceso = datetime.now(tz=timezone.utc)
     db.session.commit()
 
-    # Crear token JWT
-    access_token = create_access_token(identity=str(usuario.id))
+    # Crear token JWT con el rol incluido en el payload
+    additional_claims = {"rol": usuario.rol}
+    access_token = create_access_token(identity=str(usuario.id), additional_claims=additional_claims)
 
-    return jsonify({
+    response = jsonify({
         'access_token': access_token,
         'usuario': usuario.to_dict()
     })
+    response.set_cookie(
+        'access_token_cookie',
+        access_token,
+        httponly=True,
+        samesite='Lax',
+        path='/'
+    )
+    return response
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
@@ -110,3 +120,24 @@ def get_current_user():
     if not usuario:
         return jsonify({'error': 'Usuario no encontrado'}), 404
     return jsonify(usuario.to_dict())
+
+@auth_bp.route('/admin')
+@roles_required('admin')
+def admin_panel():
+    current_user_id = get_jwt_identity()
+    usuario = Usuario.query.get(current_user_id)
+    if not usuario:
+        return jsonify({'error': 'Acceso denegado'}), 403
+    return render_template('admin.html', usuario=usuario)
+
+@auth_bp.route('/admin_dashboard')
+@roles_required('admin')
+def admin_dashboard():
+    current_user_id = get_jwt_identity()
+    usuario = Usuario.query.get(current_user_id)
+    if not usuario:
+        return redirect(url_for('login'))
+    return render_template('admin_dashboard.html', username=usuario.username)
+
+
+

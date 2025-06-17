@@ -6,7 +6,12 @@ import os
 from flask import send_from_directory
 from Ejercicio_Pagina_Personalizada.blueprints.auth import auth_bp
 from Ejercicio_Pagina_Personalizada.models.usuario import Usuario
-
+from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, create_access_token
+from flask import jsonify
+from functools import wraps
+from flask_jwt_extended import verify_jwt_in_request, get_jwt
+from Ejercicio_Pagina_Personalizada.decorators import roles_required
 
 app = Flask(__name__)
 
@@ -20,7 +25,11 @@ app.config['WTF_CSRF_ENABLED'] = True
 app.config['WTF_CSRF_SECRET_KEY'] = app.config['CSRF_SECRET_KEY']
 
 db.init_app(app)
+migrate = Migrate(app, db)
 app.register_blueprint(auth_bp, url_prefix='/auth')
+
+# Inicializar JWTManager
+jwt = JWTManager(app)
 
 class LoginUsuario(db.Model):
     __tablename__ = 'login_usuario'
@@ -180,12 +189,20 @@ def login():
             if usuario and usuario.check_password(password):
                 session['nombre'] = usuario.nombre or usuario.username
                 session['email'] = usuario.email
-                return redirect(url_for('bienvenida'))
+                # Crear el token de acceso
+                access_token = create_access_token(identity=str(usuario.id))
+                response = jsonify({
+                    'access_token': access_token,
+                    'usuario': usuario.to_dict()
+                })
+                # Guardar el token en una cookie segura
+                response.set_cookie('access_token_cookie', access_token, httponly=True, samesite='Lax')
+                return response
             else:
                 mensaje = 'Email o contraseña incorrectos.'
     return render_template('login.html', mensaje=mensaje)
 
+# El decorador roles_required ahora está en decorators.py
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, port=5001)
+    app.run(debug=True)
