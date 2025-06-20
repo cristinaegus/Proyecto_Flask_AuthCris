@@ -1,0 +1,45 @@
+Proyecto_flask_authCris/
+│
+├── Ejercicio_Pagina_Personalizada/
+│   ├── app_ejerciciologin.py
+│   ├── ejecutar_ejercicio_pagina_personalizada.bat
+│   ├── extensions.py
+│   ├── manage.py
+│   ├── decorators.py
+│   ├── __init__.py
+│   ├── blueprints/
+│   │   ├── admin.py
+│   │   ├── auth.py
+│   │   └── __init__.py
+│   ├── models/
+│   │   ├── usuario.py
+│   │   └── __init__.py
+│   ├── static/
+│   │   ├── CSS/
+│   │   │   └── estilo_login.css
+│   │   └── __init__.py
+│   ├── templates/
+│   │   ├── admin.html
+│   │   ├── base.html
+│   │   ├── configurar.html
+│   │   ├── home.html
+│   │   ├── inicio.html
+│   │   ├── login.html
+│   │   ├── mi_web.html
+│   │   ├── promote_admin.html
+│   │   └── __init__.py
+│   ├── tests/
+│   │   ├── test_formulariologin.py
+│   │   └── __init__.py
+│   ├── utils/
+│   │   ├── validators.py
+│   │   └── __init__.py
+│   └── instance/
+│       └── config.py
+│
+├── migrations/
+│   └── ... (archivos de migraciones de base de datos)
+├── requirements.txt
+├── venv/
+├── .gitignore
+└── __init__.py
